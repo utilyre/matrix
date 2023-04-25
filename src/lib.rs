@@ -1,41 +1,58 @@
-use std::fmt::{self, Display, Formatter};
+#[derive(Clone)]
+pub struct Cursor {
+    width: usize,
 
-pub struct Matrix<T> {
-    row: usize,
-    col: usize,
-    elements: Vec<T>,
+    pub i: usize,
+    pub j: usize,
 }
 
-impl<T> Display for Matrix<T>
-where
-    T: Display,
-{
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        for i in 0..self.row {
-            write!(f, "|")?;
-            for j in 0..self.col {
-                write!(f, "{:<4}", self.elements[i * self.col + j])?;
-            }
-            write!(f, "|")?;
+impl Cursor {
+    fn new(width: usize) -> Self {
+        Self { width, i: 0, j: 0 }
+    }
 
-            writeln!(f)?;
+    fn tick(&mut self) -> usize {
+        self.j += 1;
+        if self.j == self.width {
+            self.i += 1;
+            self.j = 0;
         }
 
-        Ok(())
+        self.i * self.width + self.j
     }
 }
 
-impl<T> Matrix<T> {
-    pub fn new(row: usize, col: usize, elements: Vec<T>) -> Self {
-        assert_eq!(
-            elements.len(),
-            row * col,
-            "expected {} elements but only got {}",
-            row * col,
-            elements.len()
-        );
+pub struct MatrixIter<'a, T> {
+    elements: &'a [T],
+    cursor: Cursor,
+}
 
-        Self { row, col, elements }
+impl<'a, T> Iterator for MatrixIter<'a, T> {
+    type Item = (Cursor, &'a T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let cursor = self.cursor.clone();
+        self.elements
+            .get(self.cursor.tick() - 1)
+            .map(|element| (cursor, element))
+    }
+}
+
+pub struct Matrix<T> {
+    width: usize,
+    elements: Vec<T>,
+}
+
+impl<T> Matrix<T> {
+    pub fn new(width: usize, elements: Vec<T>) -> Self {
+        Self { width, elements }
+    }
+
+    pub fn iter(&self) -> MatrixIter<T> {
+        MatrixIter {
+            elements: &self.elements,
+            cursor: Cursor::new(self.width),
+        }
     }
 }
 
@@ -44,8 +61,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+    fn basics() {
+        let matrix = Matrix::new(3, vec![1, 2, 3, 4, 5, 6]);
     }
 }
