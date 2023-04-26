@@ -14,6 +14,9 @@ pub struct Matrix<T> {
 
 impl<T> Matrix<T> {
     pub fn new(width: usize, elements: Vec<T>) -> Self {
+        let r = elements.len() % width;
+        assert_eq!(r, 0, "missing {} elements", width - r);
+
         Self { width, elements }
     }
 
@@ -38,6 +41,12 @@ impl<T> IntoIterator for Matrix<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    #[should_panic(expected = "missing 3 elements")]
+    fn instantiate() {
+        Matrix::new(5, vec![1, 2, 3, 4, 5, 6, 7]);
+    }
 
     #[test]
     fn iter() {
