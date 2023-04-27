@@ -51,6 +51,10 @@ impl<T> Matrix<T> {
         }
     }
 
+    pub fn diagonal(&self) {
+        self.entries.iter().cursor(width)
+    }
+
     pub fn class(&self) -> Class {
         if self.rows == 0 || self.cols == 0 {
             return Class::Empty;

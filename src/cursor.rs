@@ -41,11 +41,11 @@ where
 }
 
 pub(crate) trait CursorIterator<T> {
-    fn cursor(self, width: usize) -> Cursor<Self>
+    fn cursor(self, breakat: usize) -> Cursor<Self>
     where
         Self: Sized + Iterator<Item = T>,
     {
-        Cursor::new(self, width)
+        Cursor::new(self, breakat)
     }
 }
 
