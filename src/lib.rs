@@ -1,5 +1,5 @@
 use std::{
-    ops::Add,
+    ops::{Add, AddAssign},
     slice::{Iter, IterMut},
     vec::IntoIter,
 };
@@ -64,6 +64,24 @@ where
     }
 }
 
+impl<T> AddAssign for Matrix<T>
+where
+    T: AddAssign,
+{
+    fn add_assign(&mut self, rhs: Self) {
+        assert_eq!(self.width, rhs.width, "matrices aren't the same size");
+        assert_eq!(
+            self.elements.len(),
+            rhs.elements.len(),
+            "matrices aren't the same size"
+        );
+
+        for ((_, a), (_, b)) in self.iter_mut().zip(rhs.into_iter()) {
+            *a += b;
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -116,5 +134,14 @@ mod tests {
             (m1 + m2).elements,
             vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
         );
+    }
+
+    #[test]
+    fn add_assign() {
+        let mut m1 = Matrix::new(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        let m2 = Matrix::new(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+
+        m1 += m2;
+        assert_eq!(m1.elements, vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
     }
 }
