@@ -11,7 +11,7 @@ mod cursor;
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
-    elements: Vec<T>,
+    entries: Vec<T>,
 }
 
 impl<T> Matrix<T> {
@@ -22,27 +22,27 @@ impl<T> Matrix<T> {
         Self {
             rows,
             cols,
-            elements: vec![T::default(); rows * cols],
+            entries: vec![T::default(); rows * cols],
         }
     }
 
-    pub fn with_elements(breakat: usize, elements: Vec<T>) -> Self {
-        let r = elements.len() % breakat;
-        assert_eq!(r, 0, "missing {} elements", breakat - r);
+    pub fn with_entries(breakat: usize, entries: Vec<T>) -> Self {
+        let r = entries.len() % breakat;
+        assert_eq!(r, 0, "missing {} entries", breakat - r);
 
         Self {
-            rows: elements.len() / breakat,
+            rows: entries.len() / breakat,
             cols: breakat,
-            elements,
+            entries,
         }
     }
 
     pub fn iter(&self) -> Cursor<Iter<T>> {
-        self.elements.iter().cursor(self.cols)
+        self.entries.iter().cursor(self.cols)
     }
 
     pub fn iter_mut(&mut self) -> Cursor<IterMut<T>> {
-        self.elements.iter_mut().cursor(self.cols)
+        self.entries.iter_mut().cursor(self.cols)
     }
 }
 
@@ -51,7 +51,7 @@ impl<T> IntoIterator for Matrix<T> {
     type IntoIter = Cursor<IntoIter<T>>;
 
     fn into_iter(self) -> Self::IntoIter {
-        self.elements.into_iter().cursor(self.cols)
+        self.entries.into_iter().cursor(self.cols)
     }
 }
 
@@ -64,16 +64,16 @@ where
     fn add(self, rhs: Self) -> Self::Output {
         assert_eq!(self.cols, rhs.cols, "matrices aren't the same size");
         assert_eq!(
-            self.elements.len(),
-            rhs.elements.len(),
+            self.entries.len(),
+            rhs.entries.len(),
             "matrices aren't the same size"
         );
 
-        Matrix::with_elements(
+        Matrix::with_entries(
             self.cols,
-            self.elements
+            self.entries
                 .into_iter()
-                .zip(rhs.elements.into_iter())
+                .zip(rhs.entries.into_iter())
                 .map(|(a, b)| a + b)
                 .collect(),
         )
@@ -87,8 +87,8 @@ where
     fn add_assign(&mut self, rhs: Self) {
         assert_eq!(self.cols, rhs.cols, "matrices aren't the same size");
         assert_eq!(
-            self.elements.len(),
-            rhs.elements.len(),
+            self.entries.len(),
+            rhs.entries.len(),
             "matrices aren't the same size"
         );
 
@@ -103,14 +103,14 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "missing 3 elements")]
+    #[should_panic(expected = "missing 3 entries")]
     fn instantiate() {
-        Matrix::with_elements(5, vec![1, 2, 3, 4, 5, 6, 7]);
+        Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7]);
     }
 
     #[test]
     fn iter() {
-        let matrix = Matrix::with_elements(2, vec![1, 2, 3, 4]);
+        let matrix = Matrix::with_entries(2, vec![1, 2, 3, 4]);
 
         let mut iterator = matrix.iter();
         assert_eq!(iterator.next(), Some(((0, 0), &1)));
@@ -121,19 +121,19 @@ mod tests {
 
     #[test]
     fn iter_mut() {
-        let mut matrix = Matrix::with_elements(2, vec![1, 2, 3, 4]);
+        let mut matrix = Matrix::with_entries(2, vec![1, 2, 3, 4]);
 
         let mut iterator = matrix.iter_mut();
         let (_, first) = iterator.next().unwrap();
 
         *first = 5;
 
-        assert_eq!(matrix.elements, vec![5, 2, 3, 4]);
+        assert_eq!(matrix.entries, vec![5, 2, 3, 4]);
     }
 
     #[test]
     fn into_iter() {
-        let matrix = Matrix::with_elements(2, vec![1, 2, 3, 4]);
+        let matrix = Matrix::with_entries(2, vec![1, 2, 3, 4]);
 
         let mut iterator = matrix.into_iter();
         let (_, first) = iterator.next().unwrap();
@@ -143,21 +143,21 @@ mod tests {
 
     #[test]
     fn add() {
-        let m1 = Matrix::with_elements(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        let m2 = Matrix::with_elements(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+        let m1 = Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        let m2 = Matrix::with_entries(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
 
         assert_eq!(
-            (m1 + m2).elements,
+            (m1 + m2).entries,
             vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
         );
     }
 
     #[test]
     fn add_assign() {
-        let mut m1 = Matrix::with_elements(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        let m2 = Matrix::with_elements(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+        let mut m1 = Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        let m2 = Matrix::with_entries(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
 
         m1 += m2;
-        assert_eq!(m1.elements, vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
+        assert_eq!(m1.entries, vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
     }
 }
