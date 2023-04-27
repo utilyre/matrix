@@ -8,18 +8,6 @@ use cursor::{Cursor, CursorIterator};
 
 mod cursor;
 
-#[derive(Debug, PartialEq, Default)]
-pub enum Class {
-    #[default]
-    None,
-
-    Empty,
-    Square,
-    Identity,
-    RowVector,
-    ColVector,
-}
-
 pub struct Diagonal<I>(I)
 where
     I: Iterator;
@@ -63,26 +51,20 @@ impl<T> Matrix<T> {
             .collect()
     }
 
-    pub fn class(&self) -> Class {
-        if self.rows == 0 || self.cols == 0 {
-            return Class::Empty;
-        }
+    pub fn is_empty(&self) -> bool {
+        self.rows == 0 || self.cols == 0
+    }
 
-        if self.rows == self.cols {
-            // TODO: Check for Identity Matrix
+    pub fn is_row_vector(&self) -> bool {
+        self.rows == 1
+    }
 
-            return Class::Square;
-        }
+    pub fn is_column(&self) -> bool {
+        self.cols == 1
+    }
 
-        if self.rows == 1 {
-            return Class::RowVector;
-        }
-
-        if self.cols == 1 {
-            return Class::ColVector;
-        }
-
-        Class::None
+    pub fn is_square(&self) -> bool {
+        self.rows == self.cols
     }
 
     pub fn iter(&self) -> Cursor<Iter<T>> {
@@ -164,19 +146,17 @@ mod tests {
 
     #[test]
     fn matrix_types() {
-        use super::Class::*;
-
         let empty: Matrix<()> = Matrix::with_entries(1, vec![]);
-        assert_eq!(empty.class(), Empty);
+        assert!(empty.is_empty());
 
         let row_vector = Matrix::with_entries(4, vec![1, 2, 3, 4]);
-        assert_eq!(row_vector.class(), RowVector);
+        assert!(row_vector.is_row_vector());
 
         let col_vector = Matrix::with_entries(1, vec![1, 2, 3, 4]);
-        assert_eq!(col_vector.class(), ColVector);
+        assert!(col_vector.is_column());
 
         let square = Matrix::with_entries(2, vec![1, 2, 3, 4]);
-        assert_eq!(square.class(), Square);
+        assert!(square.is_square());
     }
 
     #[test]
