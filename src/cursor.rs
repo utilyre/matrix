@@ -39,7 +39,7 @@ where
     }
 }
 
-pub(crate) trait CursorIter<T> {
+pub(crate) trait CursorIterator<T> {
     fn cursor(self, width: usize) -> Cursor<Self>
     where
         Self: Sized + Iterator<Item = T>,
@@ -48,4 +48,4 @@ pub(crate) trait CursorIter<T> {
     }
 }
 
-impl<I, T> CursorIter<T> for I where I: Iterator<Item = T> {}
+impl<I, T> CursorIterator<T> for I where I: Iterator<Item = T> {}

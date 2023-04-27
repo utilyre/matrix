@@ -4,7 +4,7 @@ use std::{
     vec::IntoIter,
 };
 
-use cursor::{Cursor, CursorIter};
+use cursor::{Cursor, CursorIterator};
 
 mod cursor;
 
