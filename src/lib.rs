@@ -20,6 +20,10 @@ pub enum Class {
     ColVector,
 }
 
+pub struct Diagonal<I>(I)
+where
+    I: Iterator;
+
 #[derive(Debug)]
 pub struct Matrix<T> {
     rows: usize,
@@ -51,8 +55,12 @@ impl<T> Matrix<T> {
         }
     }
 
-    pub fn diagonal(&self) {
-        self.entries.iter().cursor(width)
+    pub fn diagonal(&self) -> Vec<&T> {
+        self.entries
+            .iter()
+            .cursor(self.cols)
+            .filter_map(|((i, j), entry)| (i == j).then_some(entry))
+            .collect()
     }
 
     pub fn class(&self) -> Class {
@@ -146,6 +154,12 @@ mod tests {
     #[should_panic(expected = "missing 3 entries")]
     fn instantiate() {
         Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7]);
+    }
+
+    #[test]
+    fn diagonal() {
+        let matrix = Matrix::with_entries(3, vec![1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        assert_eq!(matrix.diagonal(), vec![&1, &5, &9]);
     }
 
     #[test]
