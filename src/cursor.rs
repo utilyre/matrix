@@ -1,16 +1,16 @@
 pub struct Cursor<I> {
     iter: I,
 
-    width: usize,
+    breakat: usize,
     i: usize,
     j: usize,
 }
 
 impl<I> Cursor<I> {
-    fn new(iter: I, width: usize) -> Self {
+    fn new(iter: I, breakat: usize) -> Self {
         Self {
             iter,
-            width,
+            breakat,
             i: 0,
             j: 0,
         }
@@ -30,7 +30,7 @@ where
         let j = self.j;
 
         self.j += 1;
-        if self.j == self.width {
+        if self.j == self.breakat {
             self.i += 1;
             self.j = 0;
         }
