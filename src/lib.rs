@@ -20,6 +20,7 @@ pub enum Class {
     ColVector,
 }
 
+#[derive(Debug)]
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
