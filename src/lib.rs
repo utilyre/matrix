@@ -1,4 +1,5 @@
 use std::{
+    ops::Add,
     slice::{Iter, IterMut},
     vec::IntoIter,
 };
@@ -35,6 +36,31 @@ impl<T> IntoIterator for Matrix<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.elements.into_iter().cursor(self.width)
+    }
+}
+
+impl<T> Add for Matrix<T>
+where
+    T: Add<Output = T>,
+{
+    type Output = Matrix<T>;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        assert_eq!(self.width, rhs.width, "matrices aren't the same size");
+        assert_eq!(
+            self.elements.len(),
+            rhs.elements.len(),
+            "matrices aren't the same size"
+        );
+
+        Matrix::new(
+            self.width,
+            self.elements
+                .into_iter()
+                .zip(rhs.elements.into_iter())
+                .map(|(a, b)| a + b)
+                .collect(),
+        )
     }
 }
 
@@ -79,5 +105,16 @@ mod tests {
         let (_, first) = iterator.next().unwrap();
 
         assert_eq!(first, 1);
+    }
+
+    #[test]
+    fn add() {
+        let m1 = Matrix::new(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        let m2 = Matrix::new(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+
+        assert_eq!(
+            (m1 + m2).elements,
+            vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]
+        );
     }
 }
