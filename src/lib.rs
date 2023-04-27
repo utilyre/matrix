@@ -8,6 +8,18 @@ use cursor::{Cursor, CursorIterator};
 
 mod cursor;
 
+#[derive(Debug, PartialEq, Default)]
+pub enum Class {
+    #[default]
+    None,
+
+    Empty,
+    Square,
+    Identity,
+    RowVector,
+    ColVector,
+}
+
 pub struct Matrix<T> {
     rows: usize,
     cols: usize,
@@ -27,6 +39,7 @@ impl<T> Matrix<T> {
     }
 
     pub fn with_entries(breakat: usize, entries: Vec<T>) -> Self {
+        assert!(breakat > 0, "`breakat` cannot be zero");
         let r = entries.len() % breakat;
         assert_eq!(r, 0, "missing {} entries", breakat - r);
 
@@ -35,6 +48,28 @@ impl<T> Matrix<T> {
             cols: breakat,
             entries,
         }
+    }
+
+    pub fn class(&self) -> Class {
+        if self.rows == 0 || self.cols == 0 {
+            return Class::Empty;
+        }
+
+        if self.rows == self.cols {
+            // TODO: Check for Identity Matrix
+
+            return Class::Square;
+        }
+
+        if self.rows == 1 {
+            return Class::RowVector;
+        }
+
+        if self.cols == 1 {
+            return Class::ColVector;
+        }
+
+        Class::None
     }
 
     pub fn iter(&self) -> Cursor<Iter<T>> {
@@ -106,6 +141,23 @@ mod tests {
     #[should_panic(expected = "missing 3 entries")]
     fn instantiate() {
         Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7]);
+    }
+
+    #[test]
+    fn matrix_types() {
+        use super::Class::*;
+
+        let empty: Matrix<()> = Matrix::with_entries(1, vec![]);
+        assert_eq!(empty.class(), Empty);
+
+        let row_vector = Matrix::with_entries(4, vec![1, 2, 3, 4]);
+        assert_eq!(row_vector.class(), RowVector);
+
+        let col_vector = Matrix::with_entries(1, vec![1, 2, 3, 4]);
+        assert_eq!(col_vector.class(), ColVector);
+
+        let square = Matrix::with_entries(2, vec![1, 2, 3, 4]);
+        assert_eq!(square.class(), Square);
     }
 
     #[test]
