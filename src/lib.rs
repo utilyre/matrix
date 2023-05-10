@@ -76,6 +76,22 @@ impl<T> Matrix<T> {
     }
 }
 
+// TODO: implement for all integer and decimal types
+impl Matrix<i32> {
+    pub fn is_identity(&self) -> bool {
+        self.entries
+            .iter()
+            .cursor(self.cols)
+            .all(|((i, j), entry)| {
+                if i == j {
+                    *entry == 1
+                } else {
+                    *entry == 0
+                }
+            })
+    }
+}
+
 impl<T> IntoIterator for Matrix<T> {
     type Item = ((usize, usize), T);
     type IntoIter = Cursor<IntoIter<T>>;
@@ -207,6 +223,9 @@ mod tests {
     fn add_assign() {
         let mut m1 = Matrix::with_entries(5, vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
         let m2 = Matrix::with_entries(5, vec![11, 12, 13, 14, 15, 16, 17, 18, 19, 20]);
+
+        let a: Matrix<i32> = Matrix::with_dimensions(5, 10);
+        a.is_identity();
 
         m1 += m2;
         assert_eq!(m1.entries, vec![12, 14, 16, 18, 20, 22, 24, 26, 28, 30]);
